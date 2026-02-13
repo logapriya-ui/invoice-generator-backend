@@ -10,7 +10,7 @@ app.use(express.json()); // Increased limit for logos
 // 1. DATABASE CONNECTION
 
 
-const DB_URL = "mongodb+srv://logastar2004_db_user:cube1234@cubeexpense.vppsuf0.mongodb.net/invoice_app?retryWrites=true&w=majority&appName=Cubeexpense";
+const DB_URL=process.env.MONGO_URI;
 
 mongoose.connect(DB_URL)
   .then(() => console.log("🚀 CLOUD DATABASE CONNECTED"))
