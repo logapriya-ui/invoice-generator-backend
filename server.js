@@ -24,6 +24,7 @@ const InvoiceSchema = new mongoose.Schema({
     date: Date,
     clientName: String,
     creatorEmail: String, 
+    docNumber: String,
     total: Number,
     currency: String,
     items: Array,
@@ -60,6 +61,7 @@ const UserSchema = new mongoose.Schema({
 
 const User = mongoose.model('User', UserSchema);
 
+
 // In your Signup Route, add this check:
 app.post('/api/auth/signup', async (req, res) => {
     const { name, email, password } = req.body;
@@ -91,26 +93,72 @@ app.post('/api/auth/login', async (req, res) => {
 });
 // 3. API ROUTES
 // --- Invoices ---
+app.get('/api/invoices', async (req, res) => {
+    const { email } = req.query; // Capture the email sent by the frontend
+
+    try {
+        if (!email) {
+            return res.status(400).json({ error: "Email parameter is required" }); //
+        }
+        
+        // This query ensures ONLY invoices belonging to this email are returned
+        const history = await Invoice.find({ creatorEmail: email }).sort({ createdAt: -1 });
+        res.json(history);
+    } catch (err) {
+        res.status(500).json({ error: "Failed to fetch history" }); //
+    }
+});
+
+// CREATE Invoice
 app.post('/api/invoices', async (req, res) => {
     try {
         const newInvoice = new Invoice(req.body);
         await newInvoice.save();
         res.status(201).json(newInvoice);
-    } catch (err) { res.status(400).json({ error: err.message }); }
-});
-
-
-
-app.get('/api/invoices', async (req, res) => {
-    const { email } = req.query; // Pass this from your frontend useEffect
-    try {
-        const query = email ? { creatorEmail: email } : {};
-        const history = await Invoice.find(query).sort({ createdAt: -1 });
-        res.json(history);
-    } catch (err) {
-        res.status(500).json({ error: "Failed to fetch history" });
+    } catch (err) { 
+        res.status(400).json({ error: err.message }); 
     }
 });
+
+// UPDATE (Edit) Invoice Data
+app.put('/api/invoices/:id', async (req, res) => {
+    try {
+        const updatedInvoice = await Invoice.findByIdAndUpdate(
+            req.params.id,
+            req.body,
+            { new: true }
+        );
+        res.json(updatedInvoice);
+    } catch (err) {
+        res.status(400).json({ error: "Failed to update invoice" });
+    }
+});
+
+// PATCH (Status Only) Toggle
+app.patch('/api/invoices/:id', async (req, res) => {
+    try {
+        const updatedInvoice = await Invoice.findByIdAndUpdate(
+            req.params.id, 
+            { status: req.body.status }, 
+            { new: true }
+        );
+        res.json(updatedInvoice);
+    } catch (error) {
+        res.status(500).json({ message: "Error updating status" });
+    }
+});
+
+// DELETE Invoice
+app.delete('/api/invoices/:id', async (req, res) => {
+    try {
+        await Invoice.findByIdAndDelete(req.params.id);
+        res.json({ message: "Deleted successfully" });
+    } catch (err) {
+        res.status(500).json({ error: "Delete failed" });
+    }
+});
+
+
 // FORGOT PASSWORD ROUTE (Simulated)
 app.post('/api/auth/forgot-password', async (req, res) => {
     const { email } = req.body;
@@ -126,19 +174,7 @@ app.post('/api/auth/forgot-password', async (req, res) => {
         res.status(500).json({ error: "Server error" });
     }
 });
-// --- Analytics ---
-app.get('/api/analytics', async (req, res) => {
-    const invoices = await Invoice.find();
-    const totalRevenue = invoices.reduce((sum, inv) => sum + inv.total, 0);
-    res.json({ totalRevenue, count: invoices.length });
-});
 
-// --- Clients ---
-app.post('/api/clients', async (req, res) => {
-    const client = new Client(req.body);
-    await client.save();
-    res.json(client);
-});
 
 app.get('/api/clients', async (req, res) => {
     const clients = await Client.find();
@@ -146,29 +182,6 @@ app.get('/api/clients', async (req, res) => {
 });
 
 
-// Add this to your server.js
-app.patch('/api/invoices/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { status } = req.body;
-
-    const updatedInvoice = await Invoice.findByIdAndUpdate(
-      id, 
-      { status: status }, 
-      { new: true } // This returns the updated document
-    );
-
-    if (!updatedInvoice) {
-      return res.status(404).json({ message: "Invoice not found" });
-    }
-
-    res.json(updatedInvoice);
-    console.log(`✅ Status updated to ${status} for invoice ${id}`);
-  } catch (error) {
-    console.error("Update Error:", error);
-    res.status(500).json({ message: "Server Error updating status" });
-  }
-});
 // START SERVER
 const PORT=process.env.PORT || 5000;
 app.listen(PORT,() => {
