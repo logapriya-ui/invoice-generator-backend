@@ -5,7 +5,7 @@ require('dotenv').config();
 
 const app = express();
 app.use(cors({
-    origin:["https://31cc159b.invoice-generator-frontend.pages.dev"],
+    origin:["https://71be67f5.invoice-generator-frontend.pages.dev/"],
     methods : ["GET","POST","PUT","PATCH","DELECT"],
     credentials : true
 }));
