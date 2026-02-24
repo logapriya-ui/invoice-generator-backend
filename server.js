@@ -4,7 +4,11 @@ const cors = require('cors');
 require('dotenv').config();
 
 const app = express();
-app.use(cors());
+app.use(cors({
+    origin:["https://31cc159b.invoice-generator-frontend.pages.dev"],
+    methods : ["GET","POST","PUT","PATCH","DELECT"],
+    credentials : true
+}));
 app.use(express.json()); // Increased limit for logos
 
 // 1. DATABASE CONNECTION
