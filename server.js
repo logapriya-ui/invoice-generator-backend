@@ -141,12 +141,13 @@ app.put('/api/invoices/:id', async (req, res) => {
 // PATCH (Status Only) Toggle
 app.patch('/api/invoices/:id', async (req, res) => {
     try {
-        console.log("Incoming update:",req.body)
+        console.log("Incoming update:",req.body);
         const updatedInvoice = await Invoice.findByIdAndUpdate(
             req.params.id, 
             { status: req.body.status }, 
             { new: true }
         );
+        console.log("Update invoice in DB:",updatedInvoice);
         res.json(updatedInvoice);
         
     } catch (error) {
