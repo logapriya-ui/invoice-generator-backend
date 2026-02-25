@@ -7,11 +7,10 @@ const app = express();
 app.use(cors({
     origin:[ "http://localhost:5173",
         "https://invoice-generator-frontend.pages.dev"],
-    methods : ["GET","POST","PUT","PATCH","DELETE","OPTIONS"],
+    methods : ["GET","POST","PUT","PATCH","DELETE"],
     allowedHeaders :["Content-Type","Authorization"],
     credentials : true
 }));
-app.options("*",cors());
 app.use(express.json()); // Increased limit for logos
 
 // 1. DATABASE CONNECTION
