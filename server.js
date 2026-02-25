@@ -6,7 +6,7 @@ require('dotenv').config();
 const app = express();
 app.use(cors({
     origin:["https://invoice-generator-frontend.pages.dev"],
-    methods : ["GET","POST","PUT","PATCH","DELECT"],
+    methods : ["GET","POST","PUT","PATCH","DELETE"],
     credentials : true
 }));
 app.use(express.json()); // Increased limit for logos
