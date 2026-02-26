@@ -146,7 +146,8 @@ app.patch("/api/invoices/:id", async (req, res) => {
          const { id } = req.params; 
          const { status } = req.body; 
          const updatedInvoice = await Invoice.findByIdAndUpdate( id, { status }, { new: true } );
-         if (!updatedInvoice) { return res.status(404).json({ message: "Invoice not found" });
+         res.json(updatedInvoice);
+         if (!updatedInvoice) { return res.status(500).json({ message: "Invoice not found" });
        }
       res.json(updatedInvoice); 
     }
