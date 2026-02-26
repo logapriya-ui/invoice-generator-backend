@@ -141,21 +141,20 @@ app.put('/api/invoices/:id', async (req, res) => {
 });
 
 // PATCH (Status Only) Toggle
-app.patch('/api/invoices/:id', async (req, res) => {
-    try {
-        console.log("Incoming update:",req.body);
-        const updatedInvoice = await Invoice.findByIdAndUpdate(
-            req.params.id, 
-            { status: req.body.status }, 
-            { new: true }
-        );
-        console.log("Update invoice in DB:",updatedInvoice);
-        res.json(updatedInvoice);
-        
-    } catch (error) {
-        res.status(500).json({ message: "Error updating status" });
+app.patch("/api/invoices/:id", async (req, res) => {
+     try {
+         const { id } = req.params; 
+         const { status } = req.body; 
+         const updatedInvoice = await Invoice.findByIdAndUpdate( id, { status }, { new: true } );
+         if (!updatedInvoice) { return res.status(404).json({ message: "Invoice not found" });
+       }
+      res.json(updatedInvoice); 
     }
-});
+     catch (error) { console.error("PATCH error:", error); 
+        res.status(500).json({ message: "Server error" });
+     } 
+    });
+
 
 // DELETE Invoice
 app.delete('/api/invoices/:id', async (req, res) => {
