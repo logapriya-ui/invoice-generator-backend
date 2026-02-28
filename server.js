@@ -141,27 +141,23 @@ app.put('/api/invoices/:id', async (req, res) => {
 });
 
 // PATCH (Status Only) Toggle
-app.patch("/api/invoices/:id", async (req, res) => {
-     try {
-         const { id } = req.params; 
-         const { status } = req.body; 
-         console.log("ID saved:",id); 
-         console.log(" status received:",status); 
-         const updatedInvoice = await Invoice.findByIdAndUpdate( id,{$set: { status: status } }, 
-            { new: true } );
-     
-        if (!updatedInvoice) { 
-            return res.status(500).json({ message: "Invoice not found" });
-       }
-       console.log("updated status saved:",updatedInvoice); 
-       res.json(updatedInvoice); 
-      
-    }
-     catch (error) { console.error("PATCH error:", error); 
-        res.status(500).json({ message: "Server error" });
-     } 
-    });
-
+app.patch("/api/invoices/:id", async (req, res) => 
+    { try { const { id } = req.params; const { status } = req.body;
+ // 🔎 Validate input 
+     if (!status) { return res.status(400).json({ message: "Status is required" }); 
+    } 
+    console.log("ID received:", id); 
+    console.log("New status received:", status);
+     // 🔥 Update document 
+     const updatedInvoice = await Invoice.findByIdAndUpdate( id, { $set: { status: status } }, 
+        { new: true, runValidators: true } );
+         // ❌ If invoice not found 
+         if (!updatedInvoice) { return res.status(404).json({ message: "Invoice not found" }); } 
+         console.log("Updated status saved in DB:", updatedInvoice.status); // ✅ Send updated document 
+         res.status(200).json(updatedInvoice); 
+        } catch (error) { 
+            console.error("PATCH error:", error); 
+            res.status(500).json({ message: "Server error" }); } });
 
 // DELETE Invoice
 app.delete('/api/invoices/:id', async (req, res) => {
