@@ -145,13 +145,16 @@ app.patch("/api/invoices/:id", async (req, res) => {
      try {
          const { id } = req.params; 
          const { status } = req.body; 
-         const updatedInvoice = await Invoice.findByIdAndUpdate( id, { status }, { new: true } );
+         console.log("ID saved:",id); 
+         console.log(" status received:",status); 
+         const updatedInvoice = await Invoice.findByIdAndUpdate( id,{$set: { status: status } }, 
+            { new: true } );
      
         if (!updatedInvoice) { 
             return res.status(500).json({ message: "Invoice not found" });
        }
-       console.log("updated status saved:",updatedInvoice.status); 
-      res.json(updatedInvoice); 
+       console.log("updated status saved:",updatedInvoice); 
+       res.json(updatedInvoice); 
       
     }
      catch (error) { console.error("PATCH error:", error); 
