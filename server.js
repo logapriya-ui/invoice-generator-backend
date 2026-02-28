@@ -26,7 +26,7 @@ mongoose.connect(DB_URL)
   });
 // 2. DATA MODELS
 const InvoiceSchema = new mongoose.Schema({
-    docNumber: String,
+    docNumber: {type :Number},
     date: Date,
     clientName: String,
     creatorEmail: String, 
@@ -118,9 +118,15 @@ app.get('/api/invoices', async (req, res) => {
 // CREATE Invoice
 app.post('/api/invoices', async (req, res) => {
     try {
-        const newInvoice = new Invoice(req.body);
+        //find last invoice
+        const lastInvoice = await Invoice.findOne({creatorEmail : req.body.creatorEmail}).sort({docNumber : -1});
+        const newDocNumber = lastInvoice ? lastInvoice.docNumber + 1 : 1;
+        const newInvoice = new Invoice({...req.body,docNumber : newDocNumber});
         await newInvoice.save();
+        console.log ("generater docnumber:",newDocNumber);
         res.status(201).json(newInvoice);
+        console.log("Invoice body recived:",req.body);
+
     } catch (err) { 
         res.status(400).json({ error: err.message }); 
     }
@@ -158,7 +164,6 @@ app.patch("/api/invoices/:id", async (req, res) =>
         } catch (error) { 
             console.error("PATCH error:", error); 
             res.status(500).json({ message: "Server error" }); } });
-
 // DELETE Invoice
 app.delete('/api/invoices/:id', async (req, res) => {
     try {
