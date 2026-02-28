@@ -26,7 +26,7 @@ mongoose.connect(DB_URL)
   });
 // 2. DATA MODELS
 const InvoiceSchema = new mongoose.Schema({
-    docNumber: {type :Number},
+    docNumber: String,
     date: Date,
     clientName: String,
     creatorEmail: String, 
@@ -118,15 +118,9 @@ app.get('/api/invoices', async (req, res) => {
 // CREATE Invoice
 app.post('/api/invoices', async (req, res) => {
     try {
-        //find last invoice
-        const lastInvoice = await Invoice.findOne({creatorEmail : req.body.creatorEmail}).sort({docNumber : -1});
-        const newDocNumber = lastInvoice ? lastInvoice.docNumber + 1 : 1;
-        const newInvoice = new Invoice({...req.body,docNumber : newDocNumber});
+        const newInvoice = new Invoice(req.body);
         await newInvoice.save();
-        console.log ("generater docnumber:",newDocNumber);
         res.status(201).json(newInvoice);
-        console.log("Invoice body recived:",req.body);
-
     } catch (err) { 
         res.status(400).json({ error: err.message }); 
     }
@@ -161,9 +155,9 @@ app.patch("/api/invoices/:id", async (req, res) =>
          if (!updatedInvoice) { return res.status(404).json({ message: "Invoice not found" }); } 
          console.log("Updated status saved in DB:", updatedInvoice.status); // ✅ Send updated document 
          res.status(200).json(updatedInvoice); 
-        } catch (error) { 
-            console.error("PATCH error:", error); 
+        } catch (error) { console.error("PATCH error:", error); 
             res.status(500).json({ message: "Server error" }); } });
+
 // DELETE Invoice
 app.delete('/api/invoices/:id', async (req, res) => {
     try {
